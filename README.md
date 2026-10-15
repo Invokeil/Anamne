@@ -2,6 +2,17 @@
 
 An open, offline-first personal workspace by **Invokeil Tech**. The first milestone contains a Flutter notes interface and a small self-hosted API/MCP service.
 
+## Project brief and implementation plan
+
+| Document | Purpose |
+|---|---|
+| [prompt.md](prompt.md) | Full Anamne product and implementation brief for continuing coding agents |
+| [Plan.md](Plan.md) | Detailed current status, remaining tasks, dependency order and acceptance gates |
+| [agent.md](agent.md) | Engineering instructions, data/API/MCP invariants and verification rules |
+| [AGENTS.md](AGENTS.md) | Entry point for agents that discover repository instructions by this filename |
+
+These files describe both implemented foundations and future requirements. Source exists for the initial Flutter shell; its platform builds and device behavior still need verification. See `Plan.md` for evidence and remaining work.
+
 ## Current status
 
 | Area | Available in this milestone |

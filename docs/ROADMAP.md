@@ -2,6 +2,8 @@
 
 Prepared for Himadri · 15 October 2026 · Planning document, version 1
 
+> **Historical planning context.** The project is now **Anamne**. Use [Plan.md](../Plan.md), [prompt.md](../prompt.md), and [agent.md](../agent.md) for the current implementation brief. Existing source uses Flutter with Sembast client storage, a Node.js 24/SQLite server, and the repository's MIT license. Proposed Go/Drift/AGPL/name/directory decisions below are historical options unless explicitly adopted in the current plan. Feature tables below are proposed scope, not completion claims.
+
 **প্রস্তাব:** Notion-এর পরিচিত page/block/database workflow, Obsidian-এর linking ও data portability, এবং নিজের server-এ sync—এই তিনটি নিয়ে একটি independent, local-first open-source app।
 
 **Framework recommendation:** Flutter + Dart। Android-specific integration প্রয়োজন হলে ছোট Kotlin module। VPS-এ আলাদা Go sync service। Full AppFlowy server fork এই plan-এর default নয়।
