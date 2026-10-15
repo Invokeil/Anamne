@@ -1,0 +1,12 @@
+{
+  "name": "@invokeil/anamne-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "start": "node src/http.js",
+    "mcp": "node src/mcp.js",
+    "test": "node --test"
+  }
+}

@@ -1,0 +1,35 @@
+name: anamne
+description: An open, offline-first personal workspace.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.3.0
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  sembast: ^3.9.0
+  sembast_web: ^2.4.6+1
+  uuid: ^4.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/brand/anamne-icon.svg
+    - assets/brand/anamne-loading.svg
+    - assets/brand/anamne-loading-mark.svg
+
+flutter_launcher_icons:
+  android: true
+  image_path: assets/brand/anamne-icon-512.png
+  min_sdk_android: 24

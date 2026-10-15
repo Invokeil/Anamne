@@ -1,0 +1,1 @@
+These render assets are derived from icon and loading SVGs supplied by the Anamne project owner. The Flutter loading opacity animation follows the supplied loading mark. Original C2PA metadata remains in the supplied files and was omitted from these simplified render assets.

@@ -1,0 +1,17 @@
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+**/.DS_Store
+server/data/
+server/*.sqlite*
+*.iml
+*.log
+# Platform scaffolds are generated with tool/bootstrap.sh for this first milestone.
+android/
+linux/
+web/

@@ -1,0 +1,24 @@
+[Unit]
+Description=Anamne personal workspace API
+After=network.target
+
+[Service]
+Type=simple
+User=anamne
+Group=anamne
+WorkingDirectory=/opt/anamne/server
+EnvironmentFile=/etc/anamne/anamne.env
+Environment=ANAMNE_HOST=127.0.0.1
+Environment=ANAMNE_PORT=8787
+Environment=ANAMNE_DB_PATH=/var/lib/anamne/anamne.sqlite
+StateDirectory=anamne
+ExecStart=/usr/bin/node /opt/anamne/server/src/http.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/anamne
+
+[Install]
+WantedBy=multi-user.target
