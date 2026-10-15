@@ -1,0 +1,37 @@
+# Podman / Docker Compose spec for the Anamne sync server.
+# Usage (Podman):
+#   export ANAMNE_API_TOKEN="$(openssl rand -hex 32)"
+#   podman-compose up -d            # or: podman compose up -d
+services:
+  anamne:
+    image: localhost/anamne-server:0.2.1
+    build:
+      context: ..
+      dockerfile: deploy/Containerfile
+    container_name: anamne-server
+    ports:
+      - "127.0.0.1:8787:8787"
+    environment:
+      # Admin token (required, >= 24 chars).
+      ANAMNE_API_TOKEN: ${ANAMNE_API_TOKEN:?set a strong token, e.g. openssl rand -hex 32}
+      # Optional extra users: "Name:role:token;Name2:role2:token2"
+      # roles: admin | editor | viewer
+      ANAMNE_TOKENS: ${ANAMNE_TOKENS:-}
+      # Exact browser origins, comma-separated; no wildcard or trailing slash.
+      ANAMNE_CORS_ORIGINS: ${ANAMNE_CORS_ORIGINS:-}
+    volumes:
+      - anamne-data:/data
+    restart: unless-stopped
+
+  # Optional HTTPS reverse proxy. Provide Caddyfile before enabling.
+  # caddy:
+  #   image: docker.io/library/caddy:2-alpine
+  #   ports: ["80:80", "443:443"]
+  #   volumes:
+  #     - ./Caddyfile.example:/etc/caddy/Caddyfile:ro
+  #     - caddy-data:/data
+  #   restart: unless-stopped
+
+volumes:
+  anamne-data:
+  # caddy-data:

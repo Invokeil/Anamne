@@ -1,0 +1,15 @@
+.git
+.github
+android
+linux
+web
+windows
+macos
+build
+.dart_tool
+node_modules
+server/node_modules
+server/data
+docs
+*.md
+!README.md

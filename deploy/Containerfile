@@ -1,0 +1,34 @@
+# Anamne self-hosted sync server — Podman-ready (rootless friendly).
+# Build from the repository root:
+#   podman build -f deploy/Containerfile -t localhost/anamne-server:0.2.1 .
+FROM docker.io/library/node:24-alpine
+
+LABEL org.opencontainers.image.title="Anamne Server"
+LABEL org.opencontainers.image.description="Self-hosted sync API + MCP service for the Anamne workspace"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.vendor="Invokeil Tech"
+
+WORKDIR /app
+
+# The server has zero runtime npm dependencies; copy manifests first for cache reuse.
+COPY server/package.json ./
+RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
+
+COPY server/src ./src
+RUN mkdir -p /data && chown node:node /data
+
+ENV NODE_ENV=production \
+    ANAMNE_HOST=0.0.0.0 \
+    ANAMNE_PORT=8787 \
+    ANAMNE_DB_PATH=/data/anamne.sqlite
+
+VOLUME ["/data"]
+EXPOSE 8787
+
+# Run as the unprivileged node user (rootless Podman maps this safely).
+USER node
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:8787/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+CMD ["node", "src/http.js"]

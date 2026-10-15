@@ -1,81 +1,62 @@
 # Anamne — execution plan and remaining work
 
-Last reviewed: **2026-10-15**. Implementation baseline: `e2693a543bce715aae84e7783b37354c08b6acae` on GitHub `main`. This is a living plan; update statuses using source and test evidence after each implementation slice.
+Last reviewed: **2026-10-15**. Current source: **0.2.1+3**, built on the supplied GLM 0.2.0 source. This plan records source presence separately from verified behavior.
 
-Read [prompt.md](prompt.md) for the full product requirements and [agent.md](agent.md) for engineering rules. The older [docs/ROADMAP.md](docs/ROADMAP.md) contains background research and broad options; this file resolves the current product name, stack, license and implementation order.
+Read [prompt.md](prompt.md), [agent.md](agent.md), [docs/FIXES-0.2.1.md](docs/FIXES-0.2.1.md), [docs/LOCAL_BUILD.md](docs/LOCAL_BUILD.md) and [LOCAL_AI_PROMPT.md](LOCAL_AI_PROMPT.md).
 
-## 1. What we are building
+## 1. Product and decisions
 
-**Anamne** is an open-source personal knowledge workspace: Notion-style pages, blocks and databases; offline editing; linked notes; portable data; self-hosted personal sync; and first-class API/MCP control.
+**Anamne** is an MIT-licensed personal knowledge workspace by **Invokeil Tech**. Keep the supplied icon/loading assets and **Powered by ©Invokeil Tech** attribution. The target is Notion-centered interaction with portable linked notes, offline editing, self-hosted sync and first-class API/MCP.
 
-- Product: Anamne.
-- Attribution: **Powered by ©Invokeil Tech**.
-- Repository: `Invokeil/Anamne`.
-- Initial outputs: Android APK, Linux x86_64 AppImage and web build.
-- Upcoming outputs: Windows and macOS after their own QA.
-- Local use works without a server account. A VPS is used for device sync and integrations.
-- Public distribution means people can run their own copies; managed hosting capacity is a separate operational decision.
-
-## 2. Current decisions and historical corrections
-
-| Topic | Current baseline | Remaining decision or gate |
+| Topic | Current implementation | Remaining gate |
 |---|---|---|
-| Client | Flutter + Dart, SDK constraint `>=3.8.0 <4.0.0` | Pin an actually tested Flutter release; pass editor and browser gates |
-| Android-specific code | No custom Kotlin integration yet | Add only for concrete OS integration requirements |
-| Client persistence | Sembast native file and browser IndexedDB | Evaluate Drift/SQLite with a migration preserving current pages |
-| Server | Node.js 24 + built-in SQLite | Retain until measured reasons justify a different implementation |
-| License | MIT in the current repository | Review chosen dependencies and notices before adoption/release |
-| Data authority | Simple local page records now | Versioned structured documents intended; readable Markdown portability |
-| Sync | None | Durable queue, identity, cursors, tombstones and conflict recovery |
-| MCP | Nine server stdio tools | Remote transport, resources, scopes and application-wide operation parity |
-| UI references | Generic initial shell plus design specification | Exact selected Notion screens still need evidence, measurement and comparison |
-| Stitch | Design rules prepared | No live Stitch generation or authenticated session verified in this implementation |
-| Encryption | No end-to-end encrypted sync | Separate reviewed design and recovery milestone if adopted |
+| Client | Flutter; pinned SDK 3.47.7; app 0.2.1+3 | Analyze, tests, clean target builds and device QA for these fixes |
+| Native Android | Flutter-generated project; release INTERNET permission | Production signing, file/share integration and Bengali IME QA |
+| Local data | Sembast native, IndexedDB web; block JSON with Markdown projection | Unknown-block preservation, migrations and full archive restore |
+| Server | Node.js 24 + built-in SQLite | Backup/upgrade recovery and operational QA |
+| Sync | Ordered durable outbox, expected revisions, bounded retries, change cursor, conflict copies, purge tombstones | Multi-device client verification; history and recovery UI |
+| Identity | SHA-256 token hashes; admin/editor/viewer; revoke/rotation | Secure client credential storage, expiry, device pairing and workspace isolation |
+| MCP | 14 stdio tools; shared SQLite data | Standards-compliant authenticated remote transport and measured ≥99% operation coverage |
+| UI | Block editor, links, graph, table/board, canvas source | Approved Notion reference inventory and measured visual/interaction comparisons |
+| Targets | Web, Android arm64 APK, Linux x86_64 bundle/AppImage | Local builds and install/upgrade tests; Windows/macOS later |
+| Automation | GitHub workflow manual-only | Owner explicitly chooses if/when to run paid-minute jobs |
+| Custom APIs | JSON properties and structured database API | Typed custom actions, schema validation, destinations, secrets and durable jobs |
 
-The historical roadmap's Go backend, provisional AGPL choice and unnamed-product text are superseded by the current Node.js implementation, MIT license and Anamne name. Its proposed future directory tree has not been created. Do not rewrite the server or relocate the whole project merely to resemble that old proposal.
+The old Go/AGPL proposals in [docs/ROADMAP.md](docs/ROADMAP.md) are historical; the current server is Node.js and the license is MIT. No server rewrite is planned by this fix.
+
+## 2. Source delivered and evidence
+
+GLM supplied block/slash editing, wiki links/backlinks/graph, typed table/board databases, canvases, a sync outbox/engine, role tokens and Podman examples. Its reported Flutter test/build results were not reproduced in this environment. The supplied web artifact reported 0.1.0+1 while the supplied source reported 0.2.0+2; do not distribute it as a fresh build.
+
+0.2.1 addresses page identity/pending-save errors, sync wire/retry/revision/conflict defects, atomic operation acknowledgement, descendant deletions, revoked/rotated tokens, web CORS, MCP block/canvas fields and UI database row IDs. It also supplies repeatable local setup/build commands. See the fix record for exact limits.
+
+| Verification | Evidence at this fix |
+|---|---|
+| Server tests | 19 tests pass under Node.js 24.19.0, including injected acknowledgement failure and restart/revocation |
+| Flutter regressions | Source added for navigation, draft failures/flush, bounded rejected-op retry, ack rebasing and database/delete conflicts; **not run** |
+| Flutter analysis / target builds | **Not run**: Flutter/Dart SDK unavailable in this environment |
+| Bootstrap/configuration checks | Local Python fixture and shell syntax checks; clean Flutter scaffold still requires a local SDK |
+| Container / install / physical input QA | **Not run** |
+| Existing web ZIP | Stale version metadata; excluded from this source delivery |
 
 ## 3. Status vocabulary
 
-- **Source present**: implementation exists; platform behavior may remain unverified.
-- **Verified**: a named test/build/manual scenario passed with recorded environment and evidence.
-- **Partial**: a working subset or foundation exists; listed requirements remain.
-- **Missing**: no implementation is present in the reviewed baseline.
-- **Blocked**: a concrete external dependency/access issue prevents the next action; keep unrelated work moving.
+- **Source present**: implementation exists; platform behavior remains unverified until exercised.
+- **Verified**: a named test/build/manual scenario passed with the recorded environment.
+- **Partial**: a subset exists; its full acceptance gate remains open.
+- **Missing**: the capability has no implementation in this source.
+- **Blocked**: a specific missing dependency prevents an action; unrelated work can continue.
 
-A checked item in a source inventory is not proof that a complete product milestone passed. No feature-completion percentage is asserted here.
+Unchecked milestone tasks below are acceptance work. A subset may already exist in source; inspect and verify it instead of rewriting it merely because its complete gate is unchecked. No product-completion or MCP-coverage percentage is claimed.
 
-## 4. Baseline inventory
+## 4. Immediate local continuation
 
-### Source already committed
-
-- [x] Public `Invokeil/Anamne` repository and MIT license.
-- [x] Flutter project manifest and Android/Linux/web bootstrap script.
-- [x] Responsive page navigation, drawer/sidebar and plain text editor source.
-- [x] Page/subpage creation and title/body editing source.
-- [x] Debounced save and Sembast repository implementation.
-- [x] Title/body search, recoverable trash and restore source.
-- [x] Permanent-delete dialog in the Flutter UI.
-- [x] Clipboard Markdown and workspace JSON export.
-- [x] Supplied logo derivatives and loading-mark animation adaptation.
-- [x] Node.js HTTP API with bearer-token check.
-- [x] Server SQLite page storage, custom JSON properties and optimistic PATCH version check.
-- [x] Nine MCP stdio tools sharing server storage.
-- [x] Four meaningful server tests: HTTP auth/version writes, MCP handshake/page round trip, nested page behavior, literal wildcard search.
-- [x] Two Flutter test files (model round trip and initialization-error screen).
-- [x] GitHub Actions workflow targeting server tests, web, APK and Linux AppImage.
-- [x] systemd/Caddy deployment examples and API/design/roadmap documents.
-
-### Verification record
-
-| Check | Last known result | Limit |
-|---|---|---|
-| `cd server && npm test` | Four tests passed locally during foundation work | Not a full security, durability, load or protocol compliance audit |
-| SVG parse and PNG dimensions | Passed locally | No UI screenshot comparison or OS icon QA |
-| Shell syntax and workflow YAML parse | Passed locally | Not proof that platform bootstrap/builds succeed |
-| Flutter analysis/tests/build | No recorded pass in the initial workspace | Flutter/Dart SDK absent there; no APK/AppImage/web release verified |
-| GitHub CI status query at this review | No statuses returned for baseline commit | Empty response is not proof that Actions passed, failed or never ran |
-| Physical Android / Linux / browser QA | Missing | Must record real scenarios and environment |
-| VPS live deployment | Missing | Templates exist; no Anamne server deployment verified |
+1. Preserve any laptop checkout edits, clone/update `Invokeil/Anamne`, read the root agent instructions and inspect the exact commit.
+2. Install/use Flutter 3.47.7, Node.js 24+, Python 3 and the actual host's target prerequisites.
+3. Run `bash tool/build_local.sh check`; repair analyzer/test failures while preserving the regression scenarios.
+4. Build web first, then Linux/AppImage and Android arm64 APK one at a time. Keep GitHub Actions manual-only.
+5. Verify A→B editing, leaving database/canvas before debounce, save-error retry, offline/reopen, two-device conflict/delete and MCP→app round trips.
+6. Record actual versions, commands, artifact paths/checksums and unverified items. Do not claim a physical-device pass from a compilation pass.
 
 ## 5. Remaining feature matrix
 
@@ -84,25 +65,25 @@ A checked item in a source inventory is not proof that a complete product milest
 | Local workspace management | Partial | Multiple workspaces, selection/persistence and isolation |
 | Durable page editing | Partial | Save/error/retry states, lifecycle flush and crash/reopen evidence |
 | Page organization | Partial | Move/reorder/duplicate/favorites; documented tree deletion/restoration |
-| Block editor | Missing | Schema, adapter, formatting, block operations, slash menu, IME QA |
+| Block editor | Partial | Block model + slash menu + block ops shipped; IME/device QA, undo/redo, image blocks remain |
 | Attachments | Missing | Local files/images, metadata, safe paths and resumable sync |
 | Native backup and restore | Missing | Archive manifest, checksums, import preflight and fresh-install restore |
 | Markdown/Notion/CSV import | Missing | Mappers, stable IDs, fidelity report and unsupported-content preservation |
-| Links/backlinks/tags | Missing | Stable references, indexing and navigation |
+| Links/backlinks/tags | Partial | [[wikilinks]], backlinks panel, graph view shipped; tags and unresolved-link creation UX remain |
 | Daily notes/templates | Missing | User-owned reusable structures and idempotent daily-note creation |
-| Databases | Missing | Typed property schema, records, table editing and queries |
-| Board/list/gallery/calendar | Missing | Views over the same records, with mobile behavior |
+| Databases | Partial | Typed schema, records, table + board views, sort/filter shipped; relations/rollups and calendar/gallery remain |
+| Board/list/gallery/calendar | Partial | Board shipped (drag between groups); list/gallery/calendar remain |
 | Relations/formulas/rollups | Missing | Bounded evaluation and a documented supported subset |
-| Graph | Missing | Neighborhood query and usable link navigation |
-| User/device identity | Missing | Pairing, scoped access, token storage/revoke and workspace ownership |
-| Personal sync | Missing | Outbox, cursors, revisions, retry, tombstones and conflict resolution |
+| Graph | Partial | Force-directed graph with pan/zoom/drag shipped; node count bounded at 240 |
+| User/device identity | Partial | Role-based hashed tokens with mint/revoke shipped; device pairing and scoped grants remain |
+| Personal sync | Partial | Outbox + push/pull + idempotent replay + conflict copies shipped; multi-device testing and E2EE remain |
 | History | Missing | Recoverable revisions, diff and restore policies |
 | Public API contract | Partial | Machine-readable OpenAPI, complete schemas, pagination and error policy |
 | Remote MCP | Missing | Authenticated transport, discovery, resource contexts and client tests |
 | 99% MCP control | Missing | Operation register, feature parity, permission tests and measured coverage |
 | Customized API | Partial | Existing JSON properties only; add typed schemas and safe HTTP actions |
 | Webhooks/automations | Missing | Declarative triggers, durable jobs, preview/retry/audit |
-| Selected Notion UI/UX matching | Missing | Reference ledger, approved measurements, Flutter comparison and behavior QA |
+| Selected Notion UI/UX matching | Partial | Notion-inspired block editor, sidebar, database and canvas shipped against DESIGN.md; measured reference comparison remains |
 | Themes/density/fonts | Missing | Light/dark, settings, licensed fonts and text/accessibility scaling |
 | Android integration | Missing | Share-to-note, file picker and lifecycle/permission handling |
 | Desktop ergonomics | Partial | Shortcuts, tabs, command palette, window state and later split view |
@@ -155,7 +136,7 @@ A clean checkout produces a usable client on at least one verified target. A pag
 
 ## M2 — structured editor and durable domain model
 
-**Depends on:** M1. **State:** missing.
+**Depends on:** M1. **State:** partial source; full exit gate open.
 
 ### Tasks
 
@@ -198,7 +179,7 @@ A newly installed copy reconstructs a workspace from an archive. Corrupt, oversi
 
 ## M4 — organization and knowledge links
 
-**Depends on:** M2/M3. **State:** mostly missing.
+**Depends on:** M2/M3. **State:** partial links/backlinks/graph source; organization and reference gates open.
 
 ### Tasks
 
@@ -217,7 +198,7 @@ Rename/move/export/restore preserves references. Search/backlinks reflect edits 
 
 ## M5 — databases and consistent views
 
-**Depends on:** M2/M3. **State:** missing.
+**Depends on:** M2/M3. **State:** partial table/board source; full gate open.
 
 ### Tasks
 
@@ -235,7 +216,7 @@ One record edited in any supported view is consistent in every other view and af
 
 ## M6 — identity, server contract and shared services
 
-**Depends on:** M3 and the implemented domain scope. **State:** foundational HTTP/store code only.
+**Depends on:** M3 and the implemented domain scope. **State:** partial role/token and revision-safe sync contract; isolation remains missing.
 
 ### Tasks
 
@@ -256,7 +237,7 @@ Two workspaces cannot read/write each other's data. Revoked credentials fail. Th
 
 ## M7 — connect app, server and MCP with personal sync
 
-**Depends on:** M2/M3/M6 and chosen knowledge/database subset. **State:** missing.
+**Depends on:** M2/M3/M6 and chosen knowledge/database subset. **State:** partial outbox/push/pull source; multi-device gate open.
 
 ### Tasks
 
@@ -277,7 +258,7 @@ The app and MCP operate the same logical workspace. Same-page offline edits on t
 
 ## M8 — complete MCP coverage, customized API and automation
 
-**Depends on:** M6/M7; parity work also accompanies M2–M7. **State:** nine initial stdio tools only.
+**Depends on:** M6/M7; parity work also accompanies M2–M7. **State:** 14 stdio tools; blocks/canvas supported in create/update schema; parity unmeasured.
 
 ### Tasks
 
@@ -298,7 +279,7 @@ The app and MCP operate the same logical workspace. Same-page offline edits on t
 
 `coverage = 100 × tested MCP operations / eligible implemented domain operations`.
 
-Count an operation only after its success, validation, permission and relevant failure behavior is exercised. Record OS-bound exclusions separately. Do not equate nine tools or an endpoint count with 99% application control. The current coverage is **not measured**.
+Count an operation only after its success, validation, permission and relevant failure behavior is exercised. Record OS-bound exclusions separately. Do not equate 14 tools or an endpoint count with 99% application control. The current coverage is **not measured**.
 
 ### Exit gate
 
@@ -306,7 +287,7 @@ A real MCP client can complete the supported normal workspace journeys with docu
 
 ## M9 — measured UI/UX matching and platform refinement
 
-**Depends on:** reference collection starts at M1; full flows depend on their features. **State:** specification and initial shell only.
+**Depends on:** reference collection starts at M1; full flows depend on their features. **State:** editor/database/canvas source plus specification; measured reference comparison missing.
 
 ### Tasks
 

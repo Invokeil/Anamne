@@ -23,7 +23,7 @@ If code and docs disagree, inspect both and record the difference. Do not rewrit
 - Look for applicable nested `AGENTS.md` instructions before editing a subtree.
 - Identify whether the task is documentation, bug fix, feature implementation, release or deployment.
 - For documentation-only work, edit/validate/publish the requested documents; do not start the feature backlog.
-- For general authorized build continuation, take the next incomplete dependency-ready slice in `Plan.md`; M1 is the first continuation assignment in the reviewed baseline.
+- For general authorized build continuation, take the next incomplete dependency-ready slice in `Plan.md`; M1 local client verification is the next gate; see docs/LOCAL_BUILD.md and LOCAL_AI_PROMPT.md.
 - Inspect actual toolchain availability and platform prerequisites before claiming a build can run.
 - Summarize the intended behavior briefly in Bangla mixed with English for this owner, then work.
 
@@ -31,8 +31,8 @@ If code and docs disagree, inspect both and record the difference. Do not rewrit
 
 | Path | Responsibility |
 |---|---|
-| `lib/main.dart` | Flutter entry, initial workspace UI, editor and brand loading adaptation |
-| `lib/store/page.dart` | Current plain page serialization |
+| `lib/main.dart` | Flutter entry, repository/sync lifecycle and brand loading adaptation |
+| `lib/store/page.dart` | Page/block/canvas/property serialization |
 | `lib/store/page_repository.dart` | Local page persistence and tree/export methods |
 | `lib/store/database_factory_io.dart` | Sembast native file opening |
 | `lib/store/database_factory_web.dart` | Sembast web/IndexedDB opening |
@@ -91,7 +91,7 @@ For each new supported domain action:
 
 Keep local stdio support and add remote transport according to verified MCP protocol/SDK behavior. Do not call arbitrary JSON-RPC over HTTP a complete standards-compliant transport without its required lifecycle/authentication tests.
 
-The current nine tools control server data only. Do not say they control the Flutter app before sync is implemented and verified. Calculate the 99% goal from eligible implemented operations with test evidence; tool count is not coverage.
+The current 14 tools control server data; client sync source is present. Verify a real app-to-MCP round trip before claiming application-wide control. Calculate the 99% goal from eligible implemented operations with test evidence; tool count is not coverage.
 
 Custom APIs mean typed user-defined data and declarative HTTP actions. Use named destinations, schema validation, secret references, timeouts and bounded jobs. Prevent private-network/metadata access, redirect surprises and duplicate sends. Do not implement unbounded arbitrary code execution on the notes VPS.
 

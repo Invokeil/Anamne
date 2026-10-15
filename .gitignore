@@ -15,3 +15,7 @@ server/*.sqlite*
 android/
 linux/
 web/
+.idea/
+.tools/
+__pycache__/
+*.pyc

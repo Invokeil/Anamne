@@ -1,78 +1,124 @@
 # Anamne
 
-An open, offline-first personal workspace by **Invokeil Tech**. The first milestone contains a Flutter notes interface and a small self-hosted API/MCP service.
+An open personal workspace by **Invokeil Tech**: Notion-style pages and databases,
+linked notes, local editing, self-hosted sync and first-class API/MCP.
 
-## Project brief and implementation plan
+**Source version: 0.2.1+3.** This updates the supplied GLM 0.2.0 source with reliability
+fixes. Server regression tests pass; the changed Flutter client still needs local analysis,
+tests and target builds. No verified APK/AppImage release is attached to this commit.
 
-| Document | Purpose |
-|---|---|
-| [prompt.md](prompt.md) | Full Anamne product and implementation brief for continuing coding agents |
-| [Plan.md](Plan.md) | Detailed current status, remaining tasks, dependency order and acceptance gates |
-| [agent.md](agent.md) | Engineering instructions, data/API/MCP invariants and verification rules |
-| [AGENTS.md](AGENTS.md) | Entry point for agents that discover repository instructions by this filename |
+## Build locally
 
-These files describe both implemented foundations and future requirements. Source exists for the initial Flutter shell; its platform builds and device behavior still need verification. See `Plan.md` for evidence and remaining work.
+GitHub Actions is **manual-only** to preserve the owner's exhausted build allowance.
+A push or pull request does not run this repository's build workflow. Do not dispatch it
+for the local-build task.
 
-## Current status
+```bash
+git clone https://github.com/Invokeil/Anamne.git
+cd Anamne
+# Prerequisites: Flutter 3.47.7, Node.js 24+, Python 3 and target tools.
+bash tool/build_local.sh web
+# Other targets, one at a time:
+bash tool/build_local.sh linux
+bash tool/build_local.sh apk
+# Requires appimagetool; see the guide:
+APPIMAGETOOL=/absolute/path/to/appimagetool-x86_64.AppImage APPIMAGE_EXTRACT_AND_RUN=1 bash tool/build_local.sh appimage
+```
 
-| Area | Available in this milestone |
-|---|---|
-| Flutter app | Local page and subpage editing, autosave, search, trash/restore, copy Markdown and portable JSON backup |
-| Targets | Android APK, Linux AppImage and web build workflows; Windows/macOS later |
-| VPS service | Node.js 24 + SQLite, authenticated versioned REST API |
-| MCP | Local stdio server with nine page/search/export tools, sharing the VPS database |
-| Sync | **Not implemented yet**. The app's local store and VPS store are separate today. |
-| Editor | Plain text/Markdown editing now; block editor and databases are future milestones. |
+The script bootstraps missing Flutter platform projects, applies Anamne branding and Android
+release network permission, runs server tests, `flutter analyze` and single-process Flutter
+tests, then builds the requested target. It stops on failure. Web metadata must match
+`pubspec.yaml`. It uses lower Gradle concurrency by default for an 8 GB laptop.
 
-The long-term scope and acceptance gates are in [ROADMAP.md](docs/ROADMAP.md). The visual rules are in [DESIGN.md](docs/DESIGN.md). Anamne's own icon and loading mark were supplied by the project owner.
+For installation, distro-specific prerequisites, Android tooling, output locations and
+troubleshooting use **[docs/LOCAL_BUILD.md](docs/LOCAL_BUILD.md)**. Give your local coding AI
+**[LOCAL_AI_PROMPT.md](LOCAL_AI_PROMPT.md)** for the complete build/verification assignment.
 
-## Run the app
+## Current source
 
-Install a [Flutter SDK](https://docs.flutter.dev/install) and the platform prerequisites. Then:
+| Area | Present | Remaining limits |
+|---|---|---|
+| Editor | Blocks, slash menu, headings/lists/tasks, code/callouts, reorder, database embeds | Inline rich text, complete undo/redo, attachment blocks and physical Bengali IME QA |
+| Notes | Nested pages, search, trash/restore, JSON/Markdown export | Multiple isolated workspaces, complete archive restore and import fidelity |
+| Knowledge | Wiki links, backlinks/outgoing links, bounded graph | Stable-ID link resolution, tags/templates and external-vault link fidelity |
+| Databases | Typed schema, table/board, row editing, sort/filter | Relations, formulas/rollups, calendar/gallery; advanced schema validation |
+| Canvas | Sticky notes, connectors, pan/zoom stored in page data | Device UX and save/lifecycle verification |
+| Sync | Durable ordered outbox, revision conflicts, page/database conflict copies, cursor pull, purge tombstones | Multi-device client QA, history and recovery UI; fixed 15-second retry |
+| Identity | Hashed admin/editor/viewer tokens, revoke and env rotation | One shared workspace; local tokens are not yet stored in an OS credential vault |
+| API/MCP | REST page/database/sync/token API; 14 stdio MCP tools | Authenticated remote MCP, measured 99% parity and declarative custom APIs |
+| Files | Native Markdown projection and database JSON companion | Mirror is one-way; complete backup/Obsidian compatibility is not established |
+| Targets | Web, Android arm64 APK, Linux x86_64 bundle/AppImage scripts | Fresh builds/install QA pending; Windows/macOS upcoming |
+
+The UI is inspired by Notion. Exact reference-screen/interaction matching has not been
+measured. Offline note storage works without a server; offline **web reload** needs a future
+app-shell/update strategy. Do not reuse the supplied old web ZIP: its metadata did not match
+its source. Build fresh from this checkout.
+
+## Run locally
 
 ```bash
 bash tool/bootstrap.sh
-flutter run -d chrome       # or an Android device / Linux desktop
+flutter run -d linux
+# Browser alternative: flutter run -d chrome
 ```
 
-`bootstrap.sh` creates standard Flutter Android, Linux and web scaffolds and applies the supplied brand icons. A push to `main` runs the same setup and attempts an APK, web bundle and Linux AppImage. Until CI reports success, these are build targets, not downloadable verified releases.
+Sembast stores native data; IndexedDB stores browser data. Local mutations enqueue sync
+operations in the same durable transaction. Drafts flush on navigation/lifecycle transitions;
+write errors have retry state. This does not guarantee persistence after an abrupt OS kill
+before the debounce or recover a failed write after its editor has been destroyed.
 
-The first app store is Sembast on device and IndexedDB on web. The roadmap calls for evaluating Drift/SQLite before the larger sync and database phase; this repository does not claim that migration is complete.
+## Self-hosted server and web connection
 
-## Run the self-hosted service
-
-Requires Node.js 24 or newer. On a VPS, set a strong token and bind behind HTTPS with a reverse proxy:
+Node.js 24+ is required; the server has no third-party runtime npm dependencies.
 
 ```bash
 cd server
 export ANAMNE_API_TOKEN="$(openssl rand -hex 32)"
-export ANAMNE_DB_PATH=/var/lib/anamne/anamne.sqlite
+export ANAMNE_DB_PATH=./data/anamne.sqlite
+# Exact browser origins; needed when the web app is on another host/port:
+export ANAMNE_CORS_ORIGINS="http://localhost:8080,https://notes.example.com"
 node src/http.js
 ```
 
-The service binds to `127.0.0.1:8787` by default. Keep the token private; copy it to a secret manager, not to the repository. Example request:
+The default bind is `127.0.0.1:8787`. Use HTTPS behind a reverse proxy for a deployed service.
+In Anamne settings enter the server URL and token, test, then save. Sync starts every 15 seconds
+without requiring an app restart. All HTTP roles currently share one workspace.
 
-```bash
-curl -H "Authorization: Bearer $ANAMNE_API_TOKEN" \
-  http://127.0.0.1:8787/v1/pages
-```
+See [deploy/README.md](deploy/README.md) for Podman/compose, systemd, TLS and backup guidance.
+No VPS deployment is performed by cloning/building this project. Back up the SQLite database
+before upgrading; older missing deletion/revocation history cannot be reconstructed.
 
-`PATCH /v1/pages/{id}` requires `expectedVersion` from the last GET. A stale update returns 409. API endpoints and schemas are summarized in [API.md](docs/API.md).
+## API and MCP
 
-## MCP
+[docs/API.md](docs/API.md) describes `/v1` endpoints. Updates use `expectedVersion`; sync
+creation without a revision cannot overwrite an existing ID. Identical opId retries replay
+the original acknowledgement; a different payload under the same key is rejected.
 
-The MCP server uses newline-delimited JSON-RPC over stdio and the same SQLite database. Configure an MCP host to launch `node /path/to/Anamne/server/src/mcp.js` with `ANAMNE_DB_PATH` set. For a remote VPS use an SSH stdio transport that runs this command on the server. Available tools: `list_pages`, `get_page`, `search_pages`, `create_page`, `update_page`, `trash_page`, `restore_page`, `delete_page_forever`, `export_workspace`.
+Launch an MCP host's stdio process as `node /absolute/path/to/Anamne/server/src/mcp.js`, with
+`ANAMNE_DB_PATH` pointing at the same SQLite database. SSH stdio can launch it on a VPS.
+The process inherits OS access to that database; HTTP role tokens are not its auth layer.
 
-MCP controls the VPS workspace represented by that database. It does not control the separate offline app copy until synchronization and identity/permission work is complete. Permanent deletion is explicitly named; clients should ask users before invoking it.
+Tools: `list_pages`, `get_page`, `search_pages`, `create_page`, `update_page`, `trash_page`,
+`restore_page`, `delete_page_forever`, `export_workspace`, `list_databases`, `get_database`,
+`create_database`, `upsert_database_record`, `sync_status`. Create/update support block/canvas
+fields. This is not yet a remote HTTP MCP server or a verified 99% app-control implementation.
 
-## Tests
+## Verification and plans
 
-```bash
-cd server && npm test
-```
+Node.js 24.19.0: **19 server tests passed** for this fix, including transaction rollback,
+revision safety, descendant purge, token revoke/rotation/restart, CORS and MCP behavior.
+Flutter regression source is included but **not run here** because Flutter/Dart is unavailable.
+Run `bash tool/build_local.sh check` on the laptop before distributing builds.
 
-With Flutter installed: `bash tool/bootstrap.sh && flutter analyze && flutter test`.
+| Document | Purpose |
+|---|---|
+| [docs/FIXES-0.2.1.md](docs/FIXES-0.2.1.md) | Specific fixes, evidence and remaining limitations |
+| [docs/LOCAL_BUILD.md](docs/LOCAL_BUILD.md) | Laptop setup, commands, artifacts and QA |
+| [LOCAL_AI_PROMPT.md](LOCAL_AI_PROMPT.md) | Ready-to-use local AI assignment |
+| [prompt.md](prompt.md) | Complete product requirements |
+| [Plan.md](Plan.md) | Source status, remaining milestones and acceptance gates |
+| [AGENTS.md](AGENTS.md) / [agent.md](agent.md) | Engineering rules |
+| [docs/DESIGN.md](docs/DESIGN.md) | Design direction; measured reference matching remains open |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Historical research |
 
-## Contributing and license
-
-Open issues with a reproducible case, or send a focused pull request. MIT licensed. Product name and artwork attribution: **Powered by ©Invokeil Tech**.
+MIT licensed. Preserve the supplied brand assets and **Powered by ©Invokeil Tech**.

@@ -1,8 +1,7 @@
 name: Build Anamne
 on:
-  push:
-    branches: [main]
-  pull_request:
+  # Manual only: the owner builds locally while Actions minutes are exhausted.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -25,6 +24,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.47.7
           cache: true
       - run: bash tool/bootstrap.sh
       - run: flutter analyze
@@ -42,6 +42,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.47.7
           cache: true
       - run: bash tool/bootstrap.sh
       - run: flutter build apk --release
@@ -58,6 +59,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.47.7
           cache: true
       - run: flutter config --enable-linux-desktop
       - run: bash tool/bootstrap.sh

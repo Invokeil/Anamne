@@ -23,7 +23,7 @@ test('MCP stdio handshake, tool discovery and page round trip', async () => {
   try {
     const init = await call(1, 'initialize', { protocolVersion: '2025-11-25' });
     assert.equal(init.result.serverInfo.name, 'anamne');
-    assert.equal((await call(2, 'tools/list')).result.tools.length, 9);
+    assert.equal((await call(2, 'tools/list')).result.tools.length, 14);
     const created = await call(3, 'tools/call',
       { name: 'create_page', arguments: { title: 'MCP page' } });
     const page = created.result.structuredContent;
@@ -31,6 +31,11 @@ test('MCP stdio handshake, tool discovery and page round trip', async () => {
     const fetched = await call(4, 'tools/call',
       { name: 'get_page', arguments: { id: page.id } });
     assert.equal(fetched.result.structuredContent.id, page.id);
+    const edited = await call(5, 'tools/call', { name: 'update_page', arguments: {
+      id: page.id, expectedVersion: page.version,
+      blocks: [{ id: 'block-1', type: 'paragraph', text: 'Edited through MCP' }],
+    } });
+    assert.equal(edited.result.structuredContent.blocks[0].text, 'Edited through MCP');
   } finally {
     child.stdin.end();
     child.kill();

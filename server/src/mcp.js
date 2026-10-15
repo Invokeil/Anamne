@@ -29,13 +29,15 @@ const tools = {
   create_page: {
     description: 'Create a page or subpage in this workspace.',
     inputSchema: object({ title: string, body: string,
-      parentId: { type: ['string', 'null'] }, properties: { type: 'object' } }),
+      parentId: { type: ['string', 'null'] }, properties: { type: 'object' },
+      blocks: { type: 'array' }, type: { enum: ['page', 'canvas'] }, data: { type: ['object', 'null'] } }),
     run: args => store.create(args),
   },
   update_page: {
     description: 'Edit title, body, parent or custom properties. Supply the page version to prevent lost updates.',
     inputSchema: object({ id, expectedVersion: version, title: string, body: string,
-      parentId: { type: ['string', 'null'] }, properties: { type: 'object' } },
+      parentId: { type: ['string', 'null'] }, properties: { type: 'object' },
+      blocks: { type: 'array' }, type: { enum: ['page', 'canvas'] }, data: { type: ['object', 'null'] } },
     ['id', 'expectedVersion']),
     run: ({ id, ...args }) => store.update(id, args),
   },
@@ -55,9 +57,39 @@ const tools = {
     run: ({ id }) => store.deleteForever(id),
   },
   export_workspace: {
-    description: 'Export all pages as portable Anamne JSON.',
+    description: 'Export all pages and databases as portable Anamne JSON.',
     inputSchema: object({}),
     run: () => store.export(),
+  },
+  list_databases: {
+    description: 'List structured databases, optionally including trashed ones.',
+    inputSchema: object({ deleted: { type: 'boolean' },
+      limit: { type: 'integer', minimum: 1, maximum: 500 }, offset: { type: 'integer', minimum: 0 } }),
+    run: args => ({ databases: store.listDatabases(args) }),
+  },
+  get_database: {
+    description: 'Get a database with its typed schema and records.',
+    inputSchema: object({ id, includeDeleted: { type: 'boolean' } }, ['id']),
+    run: ({ id, includeDeleted }) => store.getDatabase(id, { includeDeleted }) ||
+      (() => { throw new StoreError('Database not found', 404); })(),
+  },
+  create_database: {
+    description: 'Create a structured database with a typed property schema.',
+    inputSchema: object({ title: string, schema: { type: 'array' }, records: { type: 'array' } }),
+    run: args => store.createDatabase(args),
+  },
+  upsert_database_record: {
+    description: 'Insert or update one record inside a database. Supply the database version to prevent lost updates.',
+    inputSchema: object({ id, expectedVersion: version,
+      record: object({ id: { type: ['string', 'null'] }, values: { type: 'object' } }) },
+    ['id', 'record']),
+    run: ({ id, expectedVersion, record }) =>
+      store.upsertDatabaseRecord(id, { record, expectedVersion }),
+  },
+  sync_status: {
+    description: 'Server workspace stats: change-log head cursor and record counts for sync clients.',
+    inputSchema: object({}),
+    run: () => store.syncStatus(),
   },
 };
 
@@ -71,7 +103,7 @@ function result(message) {
       const protocolVersion = ['2025-11-25', '2025-06-18'].includes(proposed)
         ? proposed : '2025-11-25';
       return { protocolVersion, capabilities: { tools: {} },
-        serverInfo: { name: 'anamne', version: '0.1.0' } };
+        serverInfo: { name: 'anamne', version: '0.2.1' } };
     }
     case 'ping': return {};
     case 'tools/list': return { tools: Object.entries(tools).map(([name, value]) =>

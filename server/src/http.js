@@ -1,5 +1,4 @@
 import http from 'node:http';
-import { timingSafeEqual } from 'node:crypto';
 import { AnamneStore, StoreError } from './store.js';
 
 const token = process.env.ANAMNE_API_TOKEN;
@@ -13,10 +12,28 @@ const host = process.env.ANAMNE_HOST || '127.0.0.1';
 const port = Number(process.env.ANAMNE_PORT || 8787);
 
 function authorize(header) {
-  if (!header?.startsWith('Bearer ')) return false;
-  const supplied = Buffer.from(header.slice(7));
-  const expected = Buffer.from(token);
-  return supplied.length === expected.length && timingSafeEqual(supplied, expected);
+  if (!header?.startsWith('Bearer ')) return null;
+  return store.roleFor(header.slice(7));
+}
+
+const corsOrigins = new Set((process.env.ANAMNE_CORS_ORIGINS || '')
+  .split(',').map(value => value.trim()).filter(Boolean));
+
+function cors(req, res) {
+  const origin = req.headers.origin;
+  if (!origin) return true; // Native clients do not need browser CORS.
+  let sameHost = false;
+  try {
+    const parsed = new URL(origin);
+    sameHost = ['http:', 'https:'].includes(parsed.protocol) && parsed.host === req.headers.host;
+  } catch { return false; }
+  if (!sameHost && !corsOrigins.has(origin)) return false;
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+  res.setHeader('Access-Control-Max-Age', '600');
+  return true;
 }
 
 function respond(res, status, body) {
@@ -49,9 +66,27 @@ async function jsonBody(req) {
   }
 }
 
+const PAGE_PATH = /^\/v1\/pages\/([a-f0-9-]{16,80})(?:\/(trash|restore|permanent))?$/;
+const DB_PATH = /^\/v1\/databases\/([a-f0-9-]{16,80})(?:\/(trash|restore|permanent))?$/;
+const TOKEN_PATH = /^\/v1\/tokens\/([a-f0-9]{64})$/;
+
 const server = http.createServer(async (req, res) => {
   try {
-    if (!authorize(req.headers.authorization)) return respond(res, 401, { error: 'Unauthorized' });
+    if (!cors(req, res)) return respond(res, 403, { error: 'Origin is not allowed' });
+    // Preflight is unauthenticated; the actual request still needs a token.
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      return res.end();
+    }
+    // Unauthenticated liveness probe for load balancers and container healthchecks.
+    if (req.method === 'GET' && req.url === '/health') {
+      return respond(res, 200, { status: 'ok' });
+    }
+    const role = authorize(req.headers.authorization);
+    if (!role) return respond(res, 401, { error: 'Unauthorized' });
+    if (req.method !== 'GET' && role === 'viewer') {
+      return respond(res, 403, { error: 'Forbidden: viewer role cannot write' });
+    }
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const path = url.pathname;
     let result;
@@ -72,17 +107,55 @@ const server = http.createServer(async (req, res) => {
         { limit: Number(url.searchParams.get('limit') || 100) }),
     };
     else if (req.method === 'GET' && path === '/v1/export') result = store.export();
-    else {
-      const match = /^\/v1\/pages\/([a-f0-9-]{36})(?:\/(trash|restore|permanent))?$/.exec(path);
-      if (!match) return respond(res, 404, { error: 'Not found' });
-      const [, id, action] = match;
-      if (req.method === 'GET' && !action) result = store.get(id, { includeDeleted: true });
-      else if (req.method === 'PATCH' && !action) result = store.update(id, await jsonBody(req));
-      else if (req.method === 'POST' && action === 'trash') result = store.trash(id);
-      else if (req.method === 'POST' && action === 'restore') result = store.restore(id);
-      else if (req.method === 'DELETE' && action === 'permanent') result = store.deleteForever(id);
-      else return respond(res, 405, { error: 'Method not allowed' });
-      if (result === null) return respond(res, 404, { error: 'Page not found' });
+    else if (req.method === 'GET' && path === '/v1/sync/pull') result = store.syncPull({
+      cursor: Number(url.searchParams.get('cursor') || 0),
+      limit: Number(url.searchParams.get('limit') || 200),
+    });
+    else if (req.method === 'POST' && path === '/v1/sync/push') result = store.syncPush(await jsonBody(req));
+    else if (req.method === 'GET' && path === '/v1/sync/status') result = store.syncStatus();
+    else if (req.method === 'GET' && path === '/v1/databases') result = {
+      databases: store.listDatabases({
+        deleted: url.searchParams.get('deleted') === 'true',
+        limit: Number(url.searchParams.get('limit') || 100),
+        offset: Number(url.searchParams.get('offset') || 0),
+      }),
+    };
+    else if (req.method === 'POST' && path === '/v1/databases') {
+      result = store.createDatabase(await jsonBody(req));
+      status = 201;
+    } else if (path === '/v1/tokens' || TOKEN_PATH.test(path)) {
+      if (role !== 'admin') return respond(res, 403, { error: 'Forbidden: admin role required' });
+      if (req.method === 'GET' && path === '/v1/tokens') result = { tokens: store.listTokens() };
+      else if (req.method === 'POST' && path === '/v1/tokens') {
+        result = store.addToken(await jsonBody(req));
+        status = 201;
+      } else if (req.method === 'DELETE' && TOKEN_PATH.test(path)) {
+        result = store.removeToken(TOKEN_PATH.exec(path)[1]);
+      } else return respond(res, 405, { error: 'Method not allowed' });
+    } else {
+      const pageMatch = PAGE_PATH.exec(path);
+      const dbMatch = DB_PATH.exec(path);
+      if (pageMatch) {
+        const [, id, action] = pageMatch;
+        if (req.method === 'GET' && !action) result = store.get(id, { includeDeleted: true });
+        else if (req.method === 'PATCH' && !action) result = store.update(id, await jsonBody(req));
+        else if (req.method === 'POST' && action === 'trash') result = store.trash(id);
+        else if (req.method === 'POST' && action === 'restore') result = store.restore(id);
+        else if (req.method === 'DELETE' && action === 'permanent') result = store.deleteForever(id);
+        else return respond(res, 405, { error: 'Method not allowed' });
+        if (result === null) return respond(res, 404, { error: 'Page not found' });
+      } else if (dbMatch) {
+        const [, id, action] = dbMatch;
+        if (req.method === 'GET' && !action) result = store.getDatabase(id, { includeDeleted: true });
+        else if (req.method === 'PATCH' && !action) result = store.updateDatabase(id, await jsonBody(req));
+        else if (req.method === 'POST' && action === 'trash') result = store.trashDatabase(id);
+        else if (req.method === 'POST' && action === 'restore') result = store.restoreDatabase(id);
+        else if (req.method === 'DELETE' && action === 'permanent') result = store.deleteDatabaseForever(id);
+        else return respond(res, 405, { error: 'Method not allowed' });
+        if (result === null) return respond(res, 404, { error: 'Database not found' });
+      } else {
+        return respond(res, 404, { error: 'Not found' });
+      }
     }
     respond(res, status, result);
   } catch (error) {

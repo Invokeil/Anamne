@@ -21,7 +21,8 @@ test('HTTP requires a token and preserves versions on writes', async () => {
   const child = spawn(process.execPath, ['src/http.js'], {
     cwd: join(import.meta.dirname, '..'),
     env: { ...process.env, ANAMNE_DB_PATH: join(directory, 'notes.sqlite'),
-      ANAMNE_API_TOKEN: token, ANAMNE_PORT: `${port}` },
+      ANAMNE_API_TOKEN: token, ANAMNE_PORT: `${port}`,
+      ANAMNE_CORS_ORIGINS: 'https://notes.example.test' },
   });
   const base = `http://127.0.0.1:${port}/v1`;
   const request = (path, options = {}) => fetch(base + path, {
@@ -52,6 +53,14 @@ test('HTTP requires a token and preserves versions on writes', async () => {
     const stale = await request(`/pages/${page.id}`, { method: 'PATCH',
       body: JSON.stringify({ expectedVersion: page.version, body: 'stale' }) });
     assert.equal(stale.status, 409);
+    const preflight = await fetch(base + '/sync/push', { method: 'OPTIONS', headers: {
+      Origin: 'https://notes.example.test', 'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'authorization,content-type',
+    } });
+    assert.equal(preflight.status, 204);
+    assert.equal(preflight.headers.get('access-control-allow-origin'), 'https://notes.example.test');
+    assert.equal((await fetch(base + '/pages', { headers: { Origin: 'https://notes.example.test' } })).status, 401);
+    assert.equal((await request('/pages', { headers: { Origin: 'https://untrusted.example.test' } })).status, 403);
   } finally {
     child.kill('SIGTERM');
     await new Promise(resolve => child.once('exit', resolve));
