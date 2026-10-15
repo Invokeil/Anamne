@@ -24,7 +24,7 @@ class SyncStatus {
       SyncStatus(
         phase: phase ?? this.phase,
         lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
-        message: message,
+        message: message ?? this.message,
         pendingOps: pendingOps ?? this.pendingOps,
       );
 
@@ -132,7 +132,9 @@ class SyncEngine {
 
   void _startTimer() {
     _timer?.cancel();
-    if (periodic) _timer = Timer.periodic(interval, (_) => unawaited(runOnce()));
+    if (periodic) {
+      _timer = Timer.periodic(interval, (_) => unawaited(runOnce()));
+    }
   }
 
   Future<bool> testConnection() async {
@@ -167,11 +169,16 @@ class SyncEngine {
         pendingOps: await _repository.outboxCount(),
       );
     } on AnamneApiException catch (error) {
-      if (!_disposed && epoch == _epoch) status.value = status.value.copyWith(
-        phase: error.isAuth ? SyncPhase.error : SyncPhase.offline, message: error.message);
+      if (!_disposed && epoch == _epoch) {
+        status.value = status.value.copyWith(
+            phase: error.isAuth ? SyncPhase.error : SyncPhase.offline,
+            message: error.message);
+      }
     } catch (error) {
-      if (!_disposed && epoch == _epoch) status.value = status.value.copyWith(
-        phase: SyncPhase.offline, message: error.toString());
+      if (!_disposed && epoch == _epoch) {
+        status.value = status.value.copyWith(
+            phase: SyncPhase.offline, message: error.toString());
+      }
     } finally { _running = false; }
   }
 
@@ -239,7 +246,9 @@ class SyncEngine {
         }
         if (entity == 'database') {
           final record = change['database'] as Map<String, Object?>?;
-          if (record != null) await _repository.upsertDatabaseFromServer(record);
+          if (record != null) {
+            await _repository.upsertDatabaseFromServer(record);
+          }
         } else {
           final record = change['page'] as Map<String, Object?>?;
           if (record != null) await _repository.upsertFromServer(record);
