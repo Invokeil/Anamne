@@ -3,6 +3,8 @@
 Copy the prompt below to a coding AI running on your own laptop with terminal/file access.
 This is a bounded reliability/build assignment. The complete product backlog is in `Plan.md`;
 this task does not authorize implementing it all or deploying a server.
+A later source/artifact review is recorded in `docs/reviews/2026-10-15-local-build.md`; read it
+as well so historical verification gaps are not confused with later local-builder evidence.
 
 ---
 
@@ -136,3 +138,4 @@ owner. Continue independent local work without repeatedly asking for routine rev
 ask only for a concrete missing credential/access/decision that the authorized task requires.
 
 ---
+

@@ -4,8 +4,10 @@ An open personal workspace by **Invokeil Tech**: Notion-style pages and database
 linked notes, local editing, self-hosted sync and first-class API/MCP.
 
 **Source version: 0.2.1+3.** This updates the supplied GLM 0.2.0 source with reliability
-fixes. Server regression tests pass; the changed Flutter client still needs local analysis,
-tests and target builds. No verified APK/AppImage release is attached to this commit.
+fixes. The owner supplied local Web/APK/AppImage builds and a report of 22 passing Flutter tests.
+Independent checks confirm 19 server tests, APK signature/metadata and AppImage payload integrity.
+Read [the build review](docs/reviews/2026-10-15-local-build.md) for evidence and remaining device QA.
+No GitHub release assets are published by this source consolidation.
 
 ## Build locally
 
@@ -47,7 +49,7 @@ troubleshooting use **[docs/LOCAL_BUILD.md](docs/LOCAL_BUILD.md)**. Give your lo
 | Identity | Hashed admin/editor/viewer tokens, revoke and env rotation | One shared workspace; local tokens are not yet stored in an OS credential vault |
 | API/MCP | REST page/database/sync/token API; 14 stdio MCP tools | Authenticated remote MCP, measured 99% parity and declarative custom APIs |
 | Files | Native Markdown projection and database JSON companion | Mirror is one-way; complete backup/Obsidian compatibility is not established |
-| Targets | Web, Android arm64 APK, Linux x86_64 bundle/AppImage scripts | Fresh builds/install QA pending; Windows/macOS upcoming |
+| Targets | Web, Android arm64 APK, Linux x86_64 bundle/AppImage scripts | Local evaluation builds inspected; device/install QA pending; Windows/macOS upcoming |
 
 The UI is inspired by Notion. Exact reference-screen/interaction matching has not been
 measured. Offline note storage works without a server; offline **web reload** needs a future
@@ -107,11 +109,14 @@ fields. This is not yet a remote HTTP MCP server or a verified 99% app-control i
 
 Node.js 24.19.0: **19 server tests passed** for this fix, including transaction rollback,
 revision safety, descendant purge, token revoke/rotation/restart, CORS and MCP behavior.
-Flutter regression source is included but **not run here** because Flutter/Dart is unavailable.
-Run `bash tool/build_local.sh check` on the laptop before distributing builds.
+The supplied local report records **22 Flutter tests passed**, clean analysis and target builds
+on Flutter 3.47.7. Those Flutter commands were not rerun by this reviewer (SDK unavailable);
+APK/AppImage/web checks are recorded separately in the [build review](docs/reviews/2026-10-15-local-build.md).
+Run `bash tool/build_local.sh check` on the exact checkout before distributing new builds.
 
 | Document | Purpose |
 |---|---|
+| [docs/reviews/2026-10-15-local-build.md](docs/reviews/2026-10-15-local-build.md) | Uploaded source/build review, checksums and verification limits |
 | [docs/FIXES-0.2.1.md](docs/FIXES-0.2.1.md) | Specific fixes, evidence and remaining limitations |
 | [docs/LOCAL_BUILD.md](docs/LOCAL_BUILD.md) | Laptop setup, commands, artifacts and QA |
 | [LOCAL_AI_PROMPT.md](LOCAL_AI_PROMPT.md) | Ready-to-use local AI assignment |
@@ -122,3 +127,4 @@ Run `bash tool/build_local.sh check` on the laptop before distributing builds.
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Historical research |
 
 MIT licensed. Preserve the supplied brand assets and **Powered by ©Invokeil Tech**.
+

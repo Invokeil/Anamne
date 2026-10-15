@@ -29,7 +29,8 @@ The MCP server is a separate local stdio process and accesses its configured SQL
 
 ## Operations
 
-- Rotate/revoke tokens using the supported server configuration and token-store behavior; do not rely on environment-seeded credentials remaining revocable across restarts without checking the current implementation.
+- Revoke tokens through the admin API; revocation persists across restart, including env-seeded tokens. Rotate a named env seed to a fresh token to replace its old value. Removing an extra seed from the environment alone does not revoke it; revoke explicitly. Env seed names are reserved.
 - Keep SQLite files and token material out of source control and public artifacts.
 - Run tests locally with `(cd server && npm test)`.
 - Monitor logs, apply OS/Node security updates, restrict network access, and test database restore procedures before production use.
+

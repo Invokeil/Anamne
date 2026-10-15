@@ -2,6 +2,8 @@
 
 Last reviewed: **2026-10-15**. Current source: **0.2.1+3**, built on the supplied GLM 0.2.0 source. This plan records source presence separately from verified behavior.
 
+Follow-up: the owner supplied local builds from the earlier source plus five local fixes. The editor hover fix is consolidated with the existing branch changes; see [the review](docs/reviews/2026-10-15-local-build.md). Server and artifact checks passed; real-device and manual sync/MCP gates remain open.
+
 Read [prompt.md](prompt.md), [agent.md](agent.md), [docs/FIXES-0.2.1.md](docs/FIXES-0.2.1.md), [docs/LOCAL_BUILD.md](docs/LOCAL_BUILD.md) and [LOCAL_AI_PROMPT.md](LOCAL_AI_PROMPT.md).
 
 ## 1. Product and decisions
@@ -18,7 +20,7 @@ Read [prompt.md](prompt.md), [agent.md](agent.md), [docs/FIXES-0.2.1.md](docs/FI
 | Identity | SHA-256 token hashes; admin/editor/viewer; revoke/rotation | Secure client credential storage, expiry, device pairing and workspace isolation |
 | MCP | 14 stdio tools; shared SQLite data | Standards-compliant authenticated remote transport and measured ≥99% operation coverage |
 | UI | Block editor, links, graph, table/board, canvas source | Approved Notion reference inventory and measured visual/interaction comparisons |
-| Targets | Web, Android arm64 APK, Linux x86_64 bundle/AppImage | Local builds and install/upgrade tests; Windows/macOS later |
+| Targets | Web, Android arm64 APK, Linux x86_64 bundle/AppImage | Rebuild exact consolidated checkout and test install/upgrade; Windows/macOS later |
 | Automation | GitHub workflow manual-only | Owner explicitly chooses if/when to run paid-minute jobs |
 | Custom APIs | JSON properties and structured database API | Typed custom actions, schema validation, destinations, secrets and durable jobs |
 
@@ -33,11 +35,11 @@ GLM supplied block/slash editing, wiki links/backlinks/graph, typed table/board 
 | Verification | Evidence at this fix |
 |---|---|
 | Server tests | 19 tests pass under Node.js 24.19.0, including injected acknowledgement failure and restart/revocation |
-| Flutter regressions | Source added for navigation, draft failures/flush, bounded rejected-op retry, ack rebasing and database/delete conflicts; **not run** |
-| Flutter analysis / target builds | **Not run**: Flutter/Dart SDK unavailable in this environment |
+| Flutter regressions | Local builder reports 22 passes after analyzer/timer/hover fixes; reviewer did not independently rerun Flutter |
+| Flutter analysis / target builds | Local builder reports clean analysis and Web/APK/AppImage builds; supplied artifacts inspected independently, not rebuilt here |
 | Bootstrap/configuration checks | Local Python fixture and shell syntax checks; clean Flutter scaffold still requires a local SDK |
-| Container / install / physical input QA | **Not run** |
-| Existing web ZIP | Stale version metadata; excluded from this source delivery |
+| Container / install / physical input QA | **Not run** here; Linux desktop startup was reported by the local builder only |
+| Older GLM 0.2.0 web ZIP | Stale metadata; do not reuse. The later supplied 0.2.1+3 web artifact has correct metadata and report-matching checksum |
 
 ## 3. Status vocabulary
 
@@ -422,3 +424,4 @@ These are commands to run with the needed environment, not a claim that all have
 ## 10. Definition of done
 
 An implementation item is done when its accepted behavior works, necessary failure cases are exercised, migrations/recovery are safe, supported platforms have evidence, and UI/API/MCP coverage or deliberate gaps are documented. Update this file and the README together when product status changes.
+

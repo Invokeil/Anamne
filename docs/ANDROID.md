@@ -1,8 +1,12 @@
 # Android
 
+The evaluated 0.2.1+3 artifacts were supplied by the owner; no GitHub Release assets have
+been published at this review. See [the source/build review](reviews/2026-10-15-local-build.md).
+The download instructions below apply when an artifact is provided or a release is published.
+
 ## Install
 
-Download the arm64 APK from the project GitHub Release and transfer it to your device. Open it with the package installer and allow installation from that source if Android asks. The release-mode APK may be development-signed; it is suitable for evaluation, not Play Store distribution. Installing over a build signed with a different key may fail. Export or back up your workspace before changing installations.
+Use the supplied arm64 APK, or download it from a published project GitHub Release, and transfer it to your device. Open it with the package installer and allow installation from that source if Android asks. The release-mode APK may be development-signed; it is suitable for evaluation, not Play Store distribution. Installing over a build signed with a different key may fail. Export or back up your workspace before changing installations.
 
 The supplied build targets Android arm64. It is not suitable for devices that only support 32-bit ARM or x86. An Android phone or tablet is required; the desktop emulator is optional.
 
@@ -20,3 +24,4 @@ Open Settings, enter the HTTPS URL of your Anamne API and an API token with the 
 - If installation reports a signature conflict, back up/export data before uninstalling the prior package; uninstalling may erase its local data.
 - If sync fails, check the URL, token, device connectivity, server logs and CORS/TLS configuration. Never paste a private token into an issue.
 - Bengali keyboard, selection, lifecycle and real-device behavior should be tested on the target device; desktop tests do not verify those behaviors.
+

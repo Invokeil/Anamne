@@ -1,0 +1,5 @@
+3dffa702a96db47fc38ac5c0a419768b2c881f3c71a3fbbbf30f350cdc184a48  Anamne.zip
+d110c418badbc2f9fa735431f0b7dc246607aceebc79715d083c0b70037b22c8  Anamne-0.2.1+3-android-arm64-release.apk
+b64a650d64f0c1e8950390d20426eab569c8ca9dcd2a58101d981ca2853b98af  Anamne-x86_64.AppImage
+a0c66e6d812e378220ef6face32fc0fcfab2f850ae68a5f737a71333be41d198  web/main.dart.js
+877c0e0070e15b8f1caa583b76ddc9652fa1e2333caea666f8b615f2bf9a6084  linux-bundle/anamne

@@ -1,8 +1,12 @@
 # Web
 
+The evaluated 0.2.1+3 artifacts were supplied by the owner; no GitHub Release assets have
+been published at this review. See [the source/build review](reviews/2026-10-15-local-build.md).
+The download instructions below apply when an artifact is provided or a release is published.
+
 ## Open the hosted build
 
-Use the Web artifact attached to the project GitHub Release, or the project's configured web hosting URL if one is published. For a downloaded web ZIP, extract the complete archive and serve its contents over HTTP(S). Do not open `index.html` as a `file://` URL.
+Use the supplied Web directory/ZIP, a Web artifact attached to a published GitHub Release, or a configured hosting URL when available. For a downloaded web ZIP, extract the complete archive and serve its contents over HTTP(S). Do not open `index.html` as a `file://` URL.
 
 For a local preview with Python 3:
 
@@ -25,3 +29,4 @@ In Settings, configure the HTTPS API URL and token. Add the exact web origin (sc
 - Blank or missing assets: serve the full extracted directory, not just `index.html`.
 - No workspace: check the exact origin and browser profile, then restore an export if needed.
 - Sync/CORS failure: check the API URL, token, allowed origin, TLS certificate and server reachability.
+

@@ -984,45 +984,52 @@ class _BlockActionsState extends State<_BlockActions> {
       child: SizedBox(
         width: 40,
         height: 34,
-        child: Row(children: [
-          if (showControls)
-            ReorderableDragStartListener(
-              index: widget.dragIndex,
-              child: const Icon(Icons.drag_indicator, size: 18, color: hintGray),
-            ),
-          PopupMenuButton<String>(
-            tooltip: 'Block actions',
-            padding: EdgeInsets.zero,
-            iconSize: 18,
-            icon: Icon(Icons.more_vert,
-                size: 18, color: showControls ? muted : hintGray),
-            onSelected: (value) {
-              if (value == 'duplicate') widget.onDuplicate();
-              if (value == 'delete') widget.onDelete();
-              if (value == 'indent') widget.onIndent(1);
-              if (value == 'dedent') widget.onIndent(-1);
-              if (value.startsWith('turn:')) {
-                widget.onTurnInto(value.substring(5));
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
-              const PopupMenuItem(value: 'indent', child: Text('Indent')),
-              const PopupMenuItem(value: 'dedent', child: Text('Dedent')),
-              const PopupMenuDivider(),
-              for (final type in Block.mergeableTypes)
-                PopupMenuItem(
-                  value: 'turn:$type',
-                  child: Text('Turn into ${switchTypeLabel(type)}'),
-                ),
-              const PopupMenuDivider(),
-              const PopupMenuItem(
-                value: 'delete',
-                child: Text('Delete', style: TextStyle(color: dangerRed)),
+        // Drag handle plus menu button exceed 40px while hovering; scale down
+        // instead of overflowing the fixed-width gutter.
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(children: [
+            if (showControls)
+              ReorderableDragStartListener(
+                index: widget.dragIndex,
+                child: const Icon(Icons.drag_indicator,
+                    size: 18, color: hintGray),
               ),
-            ],
-          ),
-        ]),
+            PopupMenuButton<String>(
+              tooltip: 'Block actions',
+              padding: EdgeInsets.zero,
+              iconSize: 18,
+              icon: Icon(Icons.more_vert,
+                  size: 18, color: showControls ? muted : hintGray),
+              onSelected: (value) {
+                if (value == 'duplicate') widget.onDuplicate();
+                if (value == 'delete') widget.onDelete();
+                if (value == 'indent') widget.onIndent(1);
+                if (value == 'dedent') widget.onIndent(-1);
+                if (value.startsWith('turn:')) {
+                  widget.onTurnInto(value.substring(5));
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                    value: 'duplicate', child: Text('Duplicate')),
+                const PopupMenuItem(value: 'indent', child: Text('Indent')),
+                const PopupMenuItem(value: 'dedent', child: Text('Dedent')),
+                const PopupMenuDivider(),
+                for (final type in Block.mergeableTypes)
+                  PopupMenuItem(
+                    value: 'turn:$type',
+                    child: Text('Turn into ${switchTypeLabel(type)}'),
+                  ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Text('Delete', style: TextStyle(color: dangerRed)),
+                ),
+              ],
+            ),
+          ]),
+        ),
       ),
     );
   }

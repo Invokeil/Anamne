@@ -1,8 +1,12 @@
 # Linux desktop
 
+The evaluated 0.2.1+3 artifacts were supplied by the owner; no GitHub Release assets have
+been published at this review. See [the source/build review](reviews/2026-10-15-local-build.md).
+The download instructions below apply when an artifact is provided or a release is published.
+
 ## AppImage
 
-Download the x86_64 AppImage from the project GitHub Release and mark it executable:
+Use the supplied x86_64 AppImage, or download it from a published project GitHub Release, and mark it executable:
 
 ```bash
 chmod +x Anamne-x86_64.AppImage
@@ -31,3 +35,4 @@ Back up/export workspace data before replacing installations or changing storage
 - FUSE error: use `APPIMAGE_EXTRACT_AND_RUN=1` or install FUSE support appropriate to the distribution.
 - Missing shared library: install the distribution's compatible runtime package; do not assume an AppImage includes every host dependency.
 - Display/rendering issues: update the graphics stack and test on the intended distribution. A successful build on one Linux release does not establish universal compatibility.
+
