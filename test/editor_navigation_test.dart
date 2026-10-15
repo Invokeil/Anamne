@@ -56,7 +56,8 @@ void main() {
     await tester.tapAt(point);
     await tester.pump(const Duration(milliseconds: 80));
     await tester.tapAt(point);
-    await tester.pump();
+    // Let the double-tap recognizer's timers expire before the tree is disposed.
+    await tester.pump(const Duration(milliseconds: 400));
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
     expect(saved.single.id, 'canvas-A');

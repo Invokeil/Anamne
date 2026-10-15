@@ -86,8 +86,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
       await api.health();
       if (mounted) setState(() => _testResult = 'Connection OK');
     } on AnamneApiException catch (error) {
-      if (mounted) setState(() => _testResult =
-          'Failed: ${error.message}${error.statusCode == null ? '' : ' (${error.statusCode})'}');
+      if (mounted) {
+        setState(() => _testResult = 'Failed: ${error.message}'
+            '${error.statusCode == null ? '' : ' (${error.statusCode})'}');
+      }
     } catch (error) {
       if (mounted) setState(() => _testResult = 'Failed: $error');
     }

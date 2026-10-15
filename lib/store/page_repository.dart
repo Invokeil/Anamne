@@ -87,12 +87,24 @@ class PageRepository {
       if (version == null) return;
       if (entity == 'page') {
         final value = await _pages.record(id).get(txn);
-        if (value != null) await _pages.record(id).put(txn,
-            AnamnePage.fromJson(value).copyWith(serverVersion: version).toJson());
+        if (value != null) {
+          await _pages.record(id).put(
+            txn,
+            AnamnePage.fromJson(value)
+                .copyWith(serverVersion: version)
+                .toJson(),
+          );
+        }
       } else {
         final value = await _databases.record(id).get(txn);
-        if (value != null) await _databases.record(id).put(txn,
-            DbDoc.fromJson(value).copyWith(serverVersion: version).toJson());
+        if (value != null) {
+          await _databases.record(id).put(
+            txn,
+            DbDoc.fromJson(value)
+                .copyWith(serverVersion: version)
+                .toJson(),
+          );
+        }
       }
       final remaining = await _outbox.find(txn, finder: Finder(filter: Filter.and([
         Filter.equals('targetId', id), Filter.equals('entity', entity),
@@ -273,7 +285,10 @@ class PageRepository {
     }
     await _database.transaction((txn) async {
       for (final item in pages.where((p) => pending.contains(p.id))) {
-        await _pages.record(item.id).put(txn, item.copyWith(restore: true).toJson());
+        await _pages.record(item.id).put(
+          txn,
+          item.copyWith(restore: true).toJson(),
+        );
       }
       await _enqueue(txn, 'page', 'restore', id, expectedVersion: page.serverVersion);
     });
