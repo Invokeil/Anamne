@@ -19,3 +19,10 @@ web/
 .tools/
 __pycache__/
 *.pyc
+
+
+# Private self-host configuration and root-level runtime data.
+.env
+.env.*
+!.env.example
+data/

@@ -1,8 +1,8 @@
 # Web
 
-The evaluated 0.2.1+3 artifacts were supplied by the owner; no GitHub Release assets have
-been published at this review. See [the source/build review](reviews/2026-10-15-local-build.md).
-The download instructions below apply when an artifact is provided or a release is published.
+Beta downloads are in [v0.2.1-beta.1](https://github.com/Invokeil/Anamne/releases/tag/v0.2.1-beta.1).
+See [CLI install/self-host commands](INSTALL.md) and the
+[source/build review](reviews/2026-10-15-local-build.md) for provenance and remaining QA.
 
 ## Open the hosted build
 
@@ -29,4 +29,5 @@ In Settings, configure the HTTPS API URL and token. Add the exact web origin (sc
 - Blank or missing assets: serve the full extracted directory, not just `index.html`.
 - No workspace: check the exact origin and browser profile, then restore an export if needed.
 - Sync/CORS failure: check the API URL, token, allowed origin, TLS certificate and server reachability.
+
 

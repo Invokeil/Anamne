@@ -1,8 +1,8 @@
 # Android
 
-The evaluated 0.2.1+3 artifacts were supplied by the owner; no GitHub Release assets have
-been published at this review. See [the source/build review](reviews/2026-10-15-local-build.md).
-The download instructions below apply when an artifact is provided or a release is published.
+Beta downloads are in [v0.2.1-beta.1](https://github.com/Invokeil/Anamne/releases/tag/v0.2.1-beta.1).
+See [CLI install/self-host commands](INSTALL.md) and the
+[source/build review](reviews/2026-10-15-local-build.md) for provenance and remaining QA.
 
 ## Install
 
@@ -24,4 +24,5 @@ Open Settings, enter the HTTPS URL of your Anamne API and an API token with the 
 - If installation reports a signature conflict, back up/export data before uninstalling the prior package; uninstalling may erase its local data.
 - If sync fails, check the URL, token, device connectivity, server logs and CORS/TLS configuration. Never paste a private token into an issue.
 - Bengali keyboard, selection, lifecycle and real-device behavior should be tested on the target device; desktop tests do not verify those behaviors.
+
 

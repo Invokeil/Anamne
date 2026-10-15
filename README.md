@@ -7,7 +7,9 @@ linked notes, local editing, self-hosted sync and first-class API/MCP.
 fixes. The owner supplied local Web/APK/AppImage builds and a report of 22 passing Flutter tests.
 Independent checks confirm 19 server tests, APK signature/metadata and AppImage payload integrity.
 Read [the build review](docs/reviews/2026-10-15-local-build.md) for evidence and remaining device QA.
-No GitHub release assets are published by this source consolidation.
+**Beta downloads:** [Anamne 0.2.1 Beta 1](https://github.com/Invokeil/Anamne/releases/tag/v0.2.1-beta.1)
+provides APK, AppImage, Web and source packages. See [install/self-host/MCP commands](docs/INSTALL.md).
+The beta app binaries are the inspected local builds, not a fresh rebuild of the release tag.
 
 ## Build locally
 
@@ -127,4 +129,5 @@ Run `bash tool/build_local.sh check` on the exact checkout before distributing n
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Historical research |
 
 MIT licensed. Preserve the supplied brand assets and **Powered by ©Invokeil Tech**.
+
 
